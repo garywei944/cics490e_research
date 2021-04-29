@@ -40,28 +40,50 @@ graphviz.plot(dag_true)
 # Given 1 incorrect edge to blacklist
 n <- dim(dag_true$arcs)[1]
 arcs <- dag_true$arcs
-df <- data.frame(edge=character(), f1=numeric())
+df_b1 <- data.frame(edge=character(), f1=numeric())
 
 for (i in 1:n) {
   e <- arcs[i,]
   net <- hc(alarm, blacklist = e)
 
-  df[i,] <- c(paste(e, collapse = ' -> '), f1(compare(dag_true, net)))
+  df_b1[i,] <- c(paste(e, collapse = ' -> '), f1(compare(dag_true, net)))
 }
-df$f1 = as.numeric(df$f1)
+df_b1$f1 = as.numeric(df_b1$f1)
 
 gt_f1 = f1(compare(dag_true, hc(alarm)))
 
 # Make the plot
-ggplot(df, aes(x=edge, y=f1, group=1)) +
-  scale_x_discrete(limits=df$edge) +
-  scale_y_continuous(breaks = sort(c(seq(min(df$f1), max(df$f1), length.out=5), gt_f1))) +
-  geom_point(color="darkgreen") +
+ggplot(df_b1, aes(x=edge, y=f1, group=1)) +
+  scale_x_discrete(limits=df_b1$edge) +
+  scale_y_continuous(breaks = sort(c(seq(min(df_b1$f1), max(df_b1$f1), length.out=5), gt_f1))) +
+  geom_point() +
   geom_hline(aes(yintercept=gt_f1, color='red')) +
   geom_text(aes(3,gt_f1,label = 'Ground Truth', vjust = -0.5, color='red')) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  labs(title = "F1 score of the learnt network given 1 incorrect blacklist edge", 
-       x='Edge added to the blacklist', y='F1 Score')
+  labs(title = "F1 score given 1 incorrect blacklist edge",
+       x='Edge added to the blacklist', y='F1 Score') +
+  theme(legend.position = "none")
+
+# Given n random incorrect edge to blacklist
+df_bn <- data.frame(f1=numeric())
+
+for (i in 1:n) {
+  e <- arcs[sample(1:n, i),]
+  net <- hc(alarm, blacklist = e)
+
+  df_bn[i,] <- f1(compare(dag_true, net))
+}
+
+# Make the plot
+ggplot(df_bn, aes(x=(1:n), y=f1)) +
+  #scale_x_discrete(limits=df_bn$edge) +
+  scale_y_continuous(breaks = sort(c(seq(min(df_bn$f1), max(df_bn$f1), length.out=5), gt_f1))) +
+  geom_point() +
+  geom_hline(aes(yintercept=gt_f1, color='red')) +
+  geom_text(aes(3,gt_f1,label = 'Ground Truth', vjust = -0.5, color='red')) +
+  labs(title = "F1 score given n random incorrect blacklist edge",
+       x='Number of edges added to the blacklist', y='F1 Score') +
+  theme(legend.position = "none")
 
 
 
