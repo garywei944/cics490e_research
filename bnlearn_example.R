@@ -4,7 +4,7 @@ library("bnlearn") #load bnlearn package
 library("bnviewer") # load package to view bayesian networks
 
 # set base project directory
-base <- "E:/Projects/cics490e_research"
+base <- "~/Projects/cics490e_research"
 setwd(base)
 
 # variables for which we want to learn the structure
