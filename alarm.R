@@ -58,7 +58,7 @@ ggplot(df_b1, aes(x=edge, y=f1, group=1)) +
   scale_y_continuous(breaks = sort(c(seq(min(df_b1$f1), max(df_b1$f1), length.out=5), gt_f1))) +
   geom_point() +
   geom_hline(aes(yintercept=gt_f1, color='red')) +
-  geom_text(aes(3,gt_f1,label = 'Ground Truth', vjust = -0.5, color='red')) +
+  geom_text(aes(5,gt_f1,label = 'Without given prior knowedge', vjust = -0.5, color='red')) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   labs(title = "F1 score given 1 incorrect blacklist edge",
        x='Edge added to the blacklist', y='F1 Score') +
@@ -80,7 +80,7 @@ ggplot(df_bn, aes(x=(1:n), y=f1)) +
   scale_y_continuous(breaks = sort(c(seq(min(df_bn$f1), max(df_bn$f1), length.out=5), gt_f1))) +
   geom_point() +
   geom_hline(aes(yintercept=gt_f1, color='red')) +
-  geom_text(aes(3,gt_f1,label = 'Ground Truth', vjust = -0.5, color='red')) +
+  geom_text(aes(5,gt_f1,label = 'Without given prior knowedge', vjust = -0.5, color='red')) +
   labs(title = "F1 score given n random incorrect blacklist edge",
        x='Number of edges added to the blacklist', y='F1 Score') +
   theme(legend.position = "none")
