@@ -160,3 +160,40 @@ ggsave(
 )
 
 
+# Given 20 random incorrect edge to the blacklist and learn the network from different size of data
+df_size_b20 <- data.frame(size=numeric(), f1=numeric())
+
+for (i in c(100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000)) {
+  e <- arcs[sample(1:n, 20),]
+  sim <- rbn(dag_true, i, alarm)
+
+  net <- hc(sim, blacklist = e)
+
+  df_size_b20[dim(df_size_b20)[1]+1,] <- c(i, f1(compare(dag_true, net)))
+}
+df_size_b20$size = as.numeric(df_b1$size)
+df_size_b20$f1 = as.numeric(df_b1$f1)
+
+ggplot(df_size_b20, aes(x=size, y=f1)) +
+  scale_x_continuous(trans='log2') +
+  scale_y_continuous(breaks = sort(c(seq(min(df_size_b20$f1), max(df_size_b20$f1), length.out=5), gt_f1))) +
+  geom_point() +
+  geom_hline(aes(yintercept=gt_f1, color='red')) +
+  geom_text(aes(5,gt_f1,label = 'Without given prior knowledge', vjust = -0.5, color='red')) +
+  labs(title = "F1 score given 20 random incorrect blacklist edge and learn the network from different size of data",
+       x='Size of data the network learned from', y='F1 Score') +
+  theme(legend.position = "none")
+ggsave(
+  'blacklist_size_20_f1.png',
+  device = 'png',
+  path = 'figures',
+  width = 32,
+  height = 18,
+  units = 'cm'
+)
+
+
+
+
+
+save.image('data.RData')
