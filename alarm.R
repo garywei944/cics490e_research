@@ -1,18 +1,19 @@
 # # Install packages
-# install.packages("bnlearn")
+# install.packages(c("bnlearn", "bnviewer"))
 # if (!requireNamespace("BiocManager", quietly = TRUE))
 #   install.packages("BiocManager")
 # BiocManager::install()
 # BiocManager::install(c("graph", "Rgraphviz"))
+# install.packages("ggplot2")
 
 # Load packages
 library("bnlearn")
 library("bnviewer")
 library("Rgraphviz")
-library('ggplot2')
+library("ggplot2")
 
-# setwd('~/Projects/cics490e_research')
-setwd('E:/Projects/cics490e_research')
+setwd('~/Projects/cics490e_research')
+# setwd('E:/Projects/cics490e_research')
 
 # Compute f1 score given tp, fp, fn
 f1 <- function(m) {
@@ -36,6 +37,7 @@ modelstring <- paste0("[HIST|LVF][CVP|LVV][PCWP|LVV][HYP][LVV|HYP:LVF][LVF]",
                       "[ACO2|VALV][CCHL|ACO2:ANES:SAO2:TPR][HR|CCHL][CO|HR:STKV][BP|CO:TPR]")
 dag_true <- model2network(modelstring)
 graphviz.plot(dag_true)
+
 
 # Given 1 incorrect edge to blacklist
 n <- dim(dag_true$arcs)[1]
@@ -62,6 +64,14 @@ ggplot(df_b1, aes(x=edge, y=f1, group=1)) +
   labs(title = "F1 score given 1 incorrect blacklist edge",
        x='Edge added to the blacklist', y='F1 Score') +
   theme(legend.position = "none")
+ggsave(
+  'blacklist_1_f1.png',
+  device = 'png',
+  path = 'figures',
+  width = 32,
+  height = 18,
+  units = 'cm'
+)
 
 # Given n random incorrect edge to blacklist
 df_bn <- data.frame(f1=numeric())
@@ -81,6 +91,14 @@ ggplot(df_bn, aes(x=(1:n), y=f1)) +
   labs(title = "F1 score given n random incorrect blacklist edge",
        x='Number of edges added to the blacklist', y='F1 Score') +
   theme(legend.position = "none")
+ggsave(
+  'blacklist_n_f1.png',
+  device = 'png',
+  path = 'figures',
+  width = 32,
+  height = 18,
+  units = 'cm'
+)
 
 
 # Given 1 correct edge to the white list
@@ -90,15 +108,13 @@ for (i in 1:n) {
   e <- arcs[i,]
   net <- hc(alarm, whitelist = e)
 
-  df_b1[i,] <- c(paste(e, collapse = ' -> '), f1(compare(dag_true, net)))
+  df_cw1[i,] <- c(paste(e, collapse = ' -> '), f1(compare(dag_true, net)))
 }
-df_b1$f1 = as.numeric(df_b1$f1)
+df_cw1$f1 = as.numeric(df_cw1$f1)
 
-gt_f1 = f1(compare(dag_true, hc(alarm)))
-
-ggplot(df_b1, aes(x=edge, y=f1, group=1)) +
-  scale_x_discrete(limits=df_b1$edge) +
-  scale_y_continuous(breaks = sort(c(seq(min(df_b1$f1), max(df_b1$f1), length.out=5), gt_f1))) +
+ggplot(df_cw1, aes(x=edge, y=f1, group=1)) +
+  scale_x_discrete(limits=df_cw1$edge) +
+  scale_y_continuous(breaks = sort(c(seq(min(df_cw1$f1), max(df_cw1$f1), length.out=5), gt_f1))) +
   geom_point() +
   geom_hline(aes(yintercept=gt_f1, color='red')) +
   geom_text(aes(5,gt_f1,label = 'Without given prior knowledge', vjust = -0.5, color='red')) +
@@ -106,6 +122,14 @@ ggplot(df_b1, aes(x=edge, y=f1, group=1)) +
   labs(title = "F1 score given 1 correct whitelist edge",
        x='Edge added to the whitelist', y='F1 Score') +
   theme(legend.position = "none")
+ggsave(
+  'whitelist_c1_f1.png',
+  device = 'png',
+  path = 'figures',
+  width = 32,
+  height = 18,
+  units = 'cm'
+)
 
 
 # Given n random correct edge to the white list
@@ -115,18 +139,24 @@ for (i in 1:n) {
   e <- arcs[sample(1:n, i),]
   net <- hc(alarm, whitelist = e)
 
-  df_bn[i,] <- f1(compare(dag_true, net))
+  df_cwn[i,] <- f1(compare(dag_true, net))
 }
 
-ggplot(df_bn, aes(x=(1:n), y=f1)) +
-  scale_y_continuous(breaks = sort(c(seq(min(df_bn$f1), max(df_bn$f1), length.out=5), gt_f1))) +
+ggplot(df_cwn, aes(x=(1:n), y=f1)) +
+  scale_y_continuous(breaks = sort(c(seq(min(df_cwn$f1), max(df_cwn$f1), length.out=5), gt_f1))) +
   geom_point() +
   geom_hline(aes(yintercept=gt_f1, color='red')) +
   geom_text(aes(5,gt_f1,label = 'Without given prior knowledge', vjust = -0.5, color='red')) +
   labs(title = "F1 score given n random correct whitelist edge",
        x='Number of edges added to the whitelist', y='F1 Score') +
   theme(legend.position = "none")
+ggsave(
+  'whitelist_cn_f1.png',
+  device = 'png',
+  path = 'figures',
+  width = 32,
+  height = 18,
+  units = 'cm'
+)
 
-
-# TODO: Perform similar analysis on white list
 
