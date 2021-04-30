@@ -11,7 +11,7 @@ library("bnviewer")
 library("Rgraphviz")
 library('ggplot2')
 
-setwd('~/Projects/cics490e_research')
+# setwd('~/Projects/cics490e_research')
 setwd('E:/Projects/cics490e_research')
 
 # Compute f1 score given tp, fp, fn
@@ -52,13 +52,12 @@ df_b1$f1 = as.numeric(df_b1$f1)
 
 gt_f1 = f1(compare(dag_true, hc(alarm)))
 
-# Make the plot
 ggplot(df_b1, aes(x=edge, y=f1, group=1)) +
   scale_x_discrete(limits=df_b1$edge) +
   scale_y_continuous(breaks = sort(c(seq(min(df_b1$f1), max(df_b1$f1), length.out=5), gt_f1))) +
   geom_point() +
   geom_hline(aes(yintercept=gt_f1, color='red')) +
-  geom_text(aes(5,gt_f1,label = 'Without given prior knowedge', vjust = -0.5, color='red')) +
+  geom_text(aes(5,gt_f1,label = 'Without given prior knowledge', vjust = -0.5, color='red')) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   labs(title = "F1 score given 1 incorrect blacklist edge",
        x='Edge added to the blacklist', y='F1 Score') +
@@ -74,27 +73,60 @@ for (i in 1:n) {
   df_bn[i,] <- f1(compare(dag_true, net))
 }
 
-# Make the plot
 ggplot(df_bn, aes(x=(1:n), y=f1)) +
-  #scale_x_discrete(limits=df_bn$edge) +
   scale_y_continuous(breaks = sort(c(seq(min(df_bn$f1), max(df_bn$f1), length.out=5), gt_f1))) +
   geom_point() +
   geom_hline(aes(yintercept=gt_f1, color='red')) +
-  geom_text(aes(5,gt_f1,label = 'Without given prior knowedge', vjust = -0.5, color='red')) +
+  geom_text(aes(5,gt_f1,label = 'Without given prior knowledge', vjust = -0.5, color='red')) +
   labs(title = "F1 score given n random incorrect blacklist edge",
        x='Number of edges added to the blacklist', y='F1 Score') +
   theme(legend.position = "none")
 
 
+# Given 1 correct edge to the white list
+df_cw1 <- data.frame(edge=character(), f1=numeric())
+
+for (i in 1:n) {
+  e <- arcs[i,]
+  net <- hc(alarm, whitelist = e)
+
+  df_b1[i,] <- c(paste(e, collapse = ' -> '), f1(compare(dag_true, net)))
+}
+df_b1$f1 = as.numeric(df_b1$f1)
+
+gt_f1 = f1(compare(dag_true, hc(alarm)))
+
+ggplot(df_b1, aes(x=edge, y=f1, group=1)) +
+  scale_x_discrete(limits=df_b1$edge) +
+  scale_y_continuous(breaks = sort(c(seq(min(df_b1$f1), max(df_b1$f1), length.out=5), gt_f1))) +
+  geom_point() +
+  geom_hline(aes(yintercept=gt_f1, color='red')) +
+  geom_text(aes(5,gt_f1,label = 'Without given prior knowledge', vjust = -0.5, color='red')) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "F1 score given 1 correct whitelist edge",
+       x='Edge added to the whitelist', y='F1 Score') +
+  theme(legend.position = "none")
 
 
+# Given n random correct edge to the white list
+df_cwn <- data.frame(f1=numeric())
+
+for (i in 1:n) {
+  e <- arcs[sample(1:n, i),]
+  net <- hc(alarm, whitelist = e)
+
+  df_bn[i,] <- f1(compare(dag_true, net))
+}
+
+ggplot(df_bn, aes(x=(1:n), y=f1)) +
+  scale_y_continuous(breaks = sort(c(seq(min(df_bn$f1), max(df_bn$f1), length.out=5), gt_f1))) +
+  geom_point() +
+  geom_hline(aes(yintercept=gt_f1, color='red')) +
+  geom_text(aes(5,gt_f1,label = 'Without given prior knowledge', vjust = -0.5, color='red')) +
+  labs(title = "F1 score given n random correct whitelist edge",
+       x='Number of edges added to the whitelist', y='F1 Score') +
+  theme(legend.position = "none")
 
 
+# TODO: Perform similar analysis on white list
 
-
-net_true <- bn.fit(dag_true, alarm)
-
-
-net <- hc(alarm)
-
-bn <- bn.fit(net, alarm)
