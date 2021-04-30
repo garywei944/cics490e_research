@@ -25,3 +25,5 @@ We use the [F1 score](https://en.wikipedia.org/wiki/F-score) as the scorer funct
 ## Figures
 ![F1 score given 1 incorrect blacklist edge](figures/blacklist_1_f1.png)
 ![F1 score given n random incorrect blacklist edge](figures/blacklist_n_f1.png)
+![F1 score given 1 correct whitelist edge](figures/whitelist_c1_f1.png)
+![F1 score given n random correct whitelist edge](figures/whitelist_cn_f1.png)
